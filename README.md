@@ -1,78 +1,133 @@
-# MediPredict AI – File Structure & Setup Guide
+# 🏥 MediPredict AI
 
-## 📁 Required Folder Structure
+**MediPredict AI** is a Flask-based web application that predicts disease risk scores across five categories — **Diabetes, Heart Disease, Liver Disease, Kidney Disease, and Lung Disease** — using pre-trained machine learning models (scikit-learn / XGBoost).
 
-Create your project folder exactly like this:
+> ⚠️ **Disclaimer:** This tool is for informational and educational purposes only. It is **not** a substitute for professional medical diagnosis. Always consult a qualified healthcare provider.
+
+---
+
+## ✨ Features
+
+- 🔍 **Single or multi-disease prediction** — predict one condition at a time or all five at once
+- 📊 **Interactive dashboard** with patient history (stored via localStorage)
+- 📄 **PDF report generation** using ReportLab, with patient details, risk scores, and risk levels
+- 📧 **Email delivery** of PDF reports directly to patients via SMTP
+- 🎨 Clean, modern UI with custom theming per disease type
+
+---
+
+## 🧠 Machine Learning Models
+
+All models are **pre-trained** and included as `.pkl` files in the `models/` folder — no retraining required to run the app.
+
+| Disease | Files |
+|---|---|
+| Diabetes | `diabetes_model.pkl`, `diabetes_scaler.pkl` |
+| Heart Disease | `heart_model.pkl`, `heart_scaler.pkl` |
+| Liver Disease | `liver_model.pkl`, `liver_scaler.pkl` |
+| Kidney Disease | `kidney_model.pkl`, `kidney_scaler.pkl` |
+| Lung Disease | `lung_model.pkl`, `lung_scaler.pkl` |
+
+Training datasets used are included in the `datasets/` folder for reference and reproducibility.
+
+> **Note:** `heart_model.pkl` is ~69MB. If you plan to fork/clone this repo frequently, consider using [Git LFS](https://git-lfs.github.com/) for a smoother experience.
+
+---
+
+## 📁 Project Structure
 
 ```
-your_project/
+medipredict-ai/
 │
-├── app.py                    ← Flask backend (main entry point)
+├── app.py                    # Flask backend (main entry point)
+├── email_utils.py            # SMTP email sending logic
+├── report_pdf.py             # PDF report generation (ReportLab)
 │
-├── templates/                ← ALL HTML files go HERE (Flask requires this name)
-│   ├── index.html            ← Landing page (homepage)
-│   ├── dashboard.html        ← Dashboard with stats and history
-│   └── result.html           ← Prediction results page
+├── templates/                # HTML templates
+│   ├── landing.html
+│   ├── index.html
+│   ├── dashboard.html
+│   ├── result.html
+│   └── result_single.html
 │
-└── models/                   ← Your trained .pkl files go HERE
-    ├── diabetes_model.pkl
-    ├── diabetes_scaler.pkl
-    ├── heart_model.pkl
-    ├── heart_scaler.pkl
-    ├── liver_model.pkl
-    ├── liver_scaler.pkl
-    ├── kidney_model.pkl
-    ├── kidney_scaler.pkl
-    ├── lung_model.pkl
-    └── lung_scaler.pkl
+├── models/                   # Pre-trained ML models & scalers (.pkl)
+│
+├── datasets/                 # Training datasets (CSV/XLSX)
+│
+├── .gitignore
+└── README.md
 ```
 
 ---
 
-## 🚀 How to Run
+## 🚀 Getting Started
 
-1. **Install dependencies** (if not already installed):
-   ```bash
-   pip install flask numpy scikit-learn
-   ```
+### 1. Clone the repository
 
-2. **Place your .pkl model files** inside the `models/` folder.
+```bash
+git clone https://github.com/anujbhandwalkar/medipredict-ai.git
+cd medipredict-ai
+```
 
-3. **Run the app**:
-   ```bash
-   python app.py
-   ```
+### 2. Install dependencies
 
-4. **Open in browser**:
-   ```
-   http://127.0.0.1:5000/
-   ```
+```bash
+pip install flask numpy scikit-learn xgboost reportlab python-dotenv
+```
+
+### 3. Configure email (optional)
+
+To enable the "Send Report" email feature, create a `.env` file in the project root:
+
+```
+MAIL_SERVER=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=your_email@gmail.com
+MAIL_PASSWORD=your_app_password
+MAIL_SENDER=MediPredict AI <your_email@gmail.com>
+```
+
+> For Gmail: enable 2-Step Verification, then generate an **App Password** under Google Account → Security → App Passwords. Use that as `MAIL_PASSWORD`.
+
+If `.env` is not configured, the app still works — email sending will simply be disabled.
+
+### 4. Run the app
+
+```bash
+python app.py
+```
+
+Then open your browser to:
+
+```
+http://127.0.0.1:5000/
+```
 
 ---
 
-## 📄 Pages & URLs
+## 📄 Pages & Routes
 
-| Page        | URL           | File                       |
-|-------------|---------------|----------------------------|
-| Home        | `/`           | `templates/index.html`     |
-| Dashboard   | `/dashboard`  | `templates/dashboard.html` |
-| Results     | `/result`     | `templates/result.html`    |
-| Predict     | POST `/predict`| handled in `app.py`       |
-
----
-
-## 🎨 Design Notes
-
-- **Font**: Cabinet Grotesk (headings) + Instrument Sans (body) — loaded from Google Fonts
-- **Colors**: Cream/warm white background, dark sidebar, red accents
-- **Style**: Inspired by PromptHealth dashboard — clean sidebar layout, stat cards, data tables
-- **No extra CSS file needed** — all styles are embedded in each HTML file
+| Page | Route | Description |
+|---|---|---|
+| Landing | `/landing` | Homepage |
+| Predict Form | `/predict-form` | Input form for predictions |
+| Dashboard | `/dashboard` | Patient history & stats |
+| Predict (multi) | `POST /predict` | Predicts all 5 diseases at once |
+| Predict (single) | `POST /predict_single` | Predicts one selected disease |
+| Send Report | `POST /send_report` | Emails a PDF report to the patient |
 
 ---
 
-## ⚠️ Important Notes
+## 🛠️ Tech Stack
 
-- The `templates/` folder name is **mandatory** for Flask — do not rename it.
-- The `models/` folder name matches what's in `app.py` — keep it consistent.
-- `app.py` must be in the **root** of your project, NOT inside `templates/`.
-- The dashboard (`dashboard.html`) shows demo/static data — to show real prediction history, you would need a database (e.g. SQLite with Flask-SQLAlchemy).
+- **Backend:** Flask (Python)
+- **ML:** scikit-learn, XGBoost
+- **PDF Generation:** ReportLab
+- **Frontend:** HTML, CSS, JavaScript (Jinja2 templating)
+- **Storage:** Browser localStorage (patient/session data — no database required)
+
+---
+
+## 📜 License
+
+This project is for academic/educational purposes.
