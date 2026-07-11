@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediPredict AI – AI-Powered Health Risk Prediction</title>
+<script>
+  // ── ACCESS GUARD ──────────────────────────────────────────────
+  // This page can only be reached after booking a demo on the landing
+  // page (which sets medipredict_current_patient in localStorage).
+  // Runs synchronously in <head> so the form never flashes on screen
+  // for a user who skipped the booking step.
+  (function() {
+    var patient = null;
+    try {
+      patient = JSON.parse(localStorage.getItem('medipredict_current_patient') || 'null');
+    } catch (e) {
+      patient = null;
+    }
+    if (!patient || !patient.id) {
+      window.location.replace('/landing?booking_required=1');
+    }
+  })();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#f7f6f2; --bg2:#efefea; --ink:#0e0e0e; --ink2:#2c2c2c; --ink3:#6b6b6b;
+  --red:#e8392a; --red2:#c42e1d; --blue:#2563eb; --amber:#d97706;
+  --purple:#7c3aed; --green:#16a34a; --card:#ffffff; --border:rgba(0,0,0,.09);
+  --head:'Cabinet Grotesk',sans-serif; --body:'Instrument Sans',sans-serif;
+}
+body { font-family: var(--body); background: var(--bg); color: var(--ink); overflow-x: hidden; }
+
+/* NAV */
+nav { position: sticky; top: 0; z-index: 100; background: rgba(247,246,242,.95); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 66px; }
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo { width: 36px; height: 36px; background: var(--red); border-radius: 10px; display: grid; place-items: center; }
+.nav-name { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: var(--ink); letter-spacing: -.02em; }
+.nav-links { display: flex; gap: 4px; align-items: center; }
+.nav-links a { font-size: .875rem; font-weight: 500; color: var(--ink2); text-decoration: none; padding: 7px 16px; border-radius: 8px; transition: background .15s; }
+.nav-links a:hover { background: rgba(0,0,0,.05); }
+.nav-cta { background: var(--red) !important; color: #fff !important; padding: 9px 20px !important; border-radius: 10px !important; font-weight: 600 !important; }
+.nav-patient-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 20px;
+  padding: 5px 12px; font-size: .78rem; font-weight: 700; color: #15803d;
+  font-family: var(--head);
+}
+
+/* HERO */
+.hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 0; padding: 60px 48px; max-width: 1280px; margin: 0 auto; min-height: calc(100vh - 66px); }
+.hero-pill { display: inline-flex; align-items: center; gap: 6px; background: #fef2f2; border: 1px solid #fca5a5; color: var(--red); font-size: .78rem; font-weight: 600; padding: 5px 12px; border-radius: 20px; margin-bottom: 24px; text-transform: uppercase; letter-spacing: .07em; }
+.hero-pill span { width: 6px; height: 6px; background: var(--red); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.5)} }
+h1 { font-family: var(--head); font-size: clamp(2.4rem,4.5vw,3.8rem); font-weight: 900; line-height: 1.05; letter-spacing: -.04em; margin-bottom: 20px; }
+h1 em { font-style: normal; color: var(--red); }
+.hero-sub { font-size: 1rem; line-height: 1.7; color: var(--ink3); margin-bottom: 36px; max-width: 460px; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--red); color: #fff; font-family: var(--head); font-size: .95rem; font-weight: 700; padding: 13px 26px; border-radius: 12px; text-decoration: none; transition: background .2s, transform .15s; box-shadow: 0 4px 20px rgba(232,57,42,.3); }
+.btn-primary:hover { background: var(--red2); transform: translateY(-1px); }
+.btn-outline { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--border); color: var(--ink2); font-family: var(--head); font-size: .95rem; font-weight: 600; padding: 12px 22px; border-radius: 12px; text-decoration: none; transition: background .15s; }
+.btn-outline:hover { background: rgba(0,0,0,.04); }
+.hero-stats { display: flex; gap: 32px; }
+.stat-num { font-family: var(--head); font-size: 1.5rem; font-weight: 900; letter-spacing: -.04em; }
+.stat-label { font-size: .78rem; color: var(--ink3); margin-top: 2px; }
+.hero-visual { display: flex; justify-content: center; padding: 20px; }
+.hero-card { background: var(--card); border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.12); padding: 28px; width: 100%; max-width: 420px; border: 1px solid var(--border); }
+.hc-header { font-family: var(--head); font-weight: 800; font-size: 1rem; color: var(--ink); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.hc-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; }
+.disease-rows { display: flex; flex-direction: column; gap: 11px; }
+.dr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.dr-name { font-size: .82rem; font-weight: 600; color: var(--ink2); }
+.dr-pct { font-family: var(--head); font-size: .85rem; font-weight: 800; }
+.dr-bar-bg { height: 5px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+.dr-bar { height: 100%; border-radius: 3px; }
+.risk-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 16px; background: #fff7ed; border: 1px solid #fed7aa; padding: 8px 14px; border-radius: 10px; font-size: .78rem; font-weight: 600; color: #c2410c; }
+
+/* DISEASE TABS SECTION */
+.predict-section { padding: 80px 48px; max-width: 1280px; margin: 0 auto; }
+.section-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; margin-bottom: 10px; }
+.section-head { font-family: var(--head); font-size: clamp(1.8rem,3vw,2.4rem); font-weight: 900; letter-spacing: -.04em; margin-bottom: 10px; }
+.section-sub { font-size: .95rem; color: var(--ink3); max-width: 520px; line-height: 1.7; margin-bottom: 40px; }
+
+/* Disease selector tabs */
+.disease-tabs { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 32px; }
+.disease-tab {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 12px; cursor: pointer;
+  border: 2px solid var(--border); background: var(--card);
+  font-family: var(--head); font-size: .85rem; font-weight: 700;
+  color: var(--ink3); transition: all .2s;
+}
+.disease-tab:hover { border-color: rgba(0,0,0,.2); color: var(--ink); }
+.disease-tab .tab-dot { width: 9px; height: 9px; border-radius: 50%; }
+.disease-tab.active { color: #fff; border-color: transparent; }
+.disease-tab[data-disease="diabetes"].active  { background: var(--blue); }
+.disease-tab[data-disease="heart"].active     { background: var(--red); }
+.disease-tab[data-disease="liver"].active     { background: var(--amber); }
+.disease-tab[data-disease="kidney"].active    { background: var(--green); }
+.disease-tab[data-disease="lung"].active      { background: var(--purple); }
+
+/* Form panels */
+.form-panels { }
+.form-panel { display: none; }
+.form-panel.active { display: block; animation: fadeUp .3s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+
+.panel-card {
+  background: var(--card); border-radius: 20px;
+  border: 2px solid var(--border);
+  box-shadow: 0 4px 32px rgba(0,0,0,.07);
+  overflow: hidden;
+}
+.panel-header {
+  padding: 28px 36px 24px;
+  display: flex; align-items: center; gap: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.panel-icon { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; flex-shrink: 0; }
+.panel-title { font-family: var(--head); font-size: 1.2rem; font-weight: 900; letter-spacing: -.03em; }
+.panel-desc { font-size: .85rem; color: var(--ink3); margin-top: 3px; }
+.panel-body { padding: 32px 36px 36px; }
+
+.inputs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media(max-width:960px){ .inputs-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:500px){ .inputs-grid { grid-template-columns: 1fr; } }
+.inputs-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.inputs-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+@media(max-width:768px){ .inputs-grid-3,.inputs-grid-2 { grid-template-columns: 1fr 1fr; } }
+
+.input-group { display: flex; flex-direction: column; gap: 5px; }
+.input-group label { font-size: .72rem; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: .05em; }
+.input-group input, .input-group select {
+  height: 44px; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 0 14px; font-family: var(--body); font-size: .9rem; color: var(--ink);
+  background: var(--bg); outline: none; transition: border-color .2s, box-shadow .2s;
+  appearance: none;
+}
+.input-group input::placeholder { color: #c0bfba; }
+
+/* Accent focus colors per disease */
+.panel-diabetes .input-group input:focus,
+.panel-diabetes .input-group select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
+.panel-heart .input-group input:focus,
+.panel-heart .input-group select:focus   { border-color: var(--red);  box-shadow: 0 0 0 3px rgba(232,57,42,.1); }
+.panel-liver .input-group input:focus,
+.panel-liver .input-group select:focus   { border-color: var(--amber);box-shadow: 0 0 0 3px rgba(217,119,6,.1); }
+.panel-kidney .input-group input:focus,
+.panel-kidney .input-group select:focus  { border-color: var(--green);box-shadow: 0 0 0 3px rgba(22,163,74,.1); }
+.panel-lung .input-group input:focus,
+.panel-lung .input-group select:focus    { border-color: var(--purple);box-shadow:0 0 0 3px rgba(124,58,237,.1); }
+
+.predict-btn {
+  width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;
+  color: #fff; font-family: var(--head); font-size: 1rem; font-weight: 700;
+  border: none; border-radius: 12px; padding: 15px 32px; margin-top: 28px;
+  cursor: pointer; transition: opacity .2s, transform .15s; letter-spacing: -.01em;
+}
+.predict-btn:hover { opacity: .88; transform: translateY(-1px); }
+.btn-diabetes { background: var(--blue); box-shadow: 0 4px 20px rgba(37,99,235,.3); }
+.btn-heart    { background: var(--red);  box-shadow: 0 4px 20px rgba(232,57,42,.3); }
+.btn-liver    { background: var(--amber);box-shadow: 0 4px 20px rgba(217,119,6,.3); }
+.btn-kidney   { background: var(--green);box-shadow: 0 4px 20px rgba(22,163,74,.3); }
+.btn-lung     { background: var(--purple);box-shadow:0 4px 20px rgba(124,58,237,.3); }
+
+/* HOW IT WORKS */
+.how-section { background: var(--ink); padding: 80px 48px; }
+.how-inner { max-width: 1280px; margin: 0 auto; }
+.steps-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+@media(max-width:768px){ .steps-grid { grid-template-columns: 1fr; } }
+.step-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 28px 24px; }
+.step-num { font-family: var(--head); font-size: 3rem; font-weight: 900; color: rgba(255,255,255,.07); line-height: 1; margin-bottom: 12px; }
+.step-title { font-family: var(--head); font-size: 1.05rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.step-desc { font-size: .85rem; color: #9ca3af; line-height: 1.65; }
+
+footer { background: var(--ink); color: rgba(255,255,255,.4); text-align: center; padding: 22px 20px; font-size: .82rem; display: flex; align-items: center; justify-content: center; gap: 6px; }
+footer strong { color: rgba(255,255,255,.7); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="/landing">
+    <div class="nav-logo"><svg viewBox="0 0 20 20" fill="none"><path d="M10 18s-7-4.7-7-9.5A4.5 4.5 0 0 1 10 5.1a4.5 4.5 0 0 1 7 3.4C17 13.3 10 18 10 18z" fill="#fff"/></svg></div>
+    <span class="nav-name">MediPredict AI</span>
+  </a>
+  <div class="nav-links">
+    <div id="navPatientChip" class="nav-patient-chip" style="display:none">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span id="navPatientLabel">Patient</span>
+    </div>
+    <a href="#predict">Predict</a>
+    <a href="#how">How It Works</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/landing" class="nav-cta">Book Demo</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section style="background:var(--bg)">
+<div class="hero">
+  <div>
+    <div class="hero-pill"><span></span> AI-Powered Health Intelligence</div>
+    <h1>Predict disease risk<br>before it <em>finds you</em></h1>
+    <p class="hero-sub">Advanced ML models analyse your health parameters across five critical disease categories — giving you early, actionable insights in seconds.</p>
+    <div class="hero-actions">
+      <a href="#predict" class="btn-primary"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Run Prediction</a>
+      <a href="/dashboard" class="btn-outline">View Dashboard</a>
+    </div>
+    <div class="hero-stats">
+      <div><div class="stat-num">5</div><div class="stat-label">Diseases Covered</div></div>
+      <div><div class="stat-num">83%</div><div class="stat-label">Avg. Accuracy</div></div>
+      <div><div class="stat-num">&lt;2s</div><div class="stat-label">Per Prediction</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-card">
+      <div class="hc-header"><div class="hc-dot"></div>Sample Risk Preview</div>
+      <div class="disease-rows">
+        <div><div class="dr-top"><span class="dr-name">Diabetes</span><span class="dr-pct" style="color:#2563eb">62%</span></div><div class="dr-bar-bg"><div class="dr-bar" style="width:62%;background:#2563eb"></div></div></div>
+        <div><div class="dr-top"><span class="dr-name">Heart Disease</span><span class="dr-pct" style="color:#e8392a">81%</span></div><div class="dr-bar-bg"><div class="dr-bar" style="width:81%;background:#e8392a"></div></div></div>
+        <div><div class="dr-top"><span class="dr-name">Liver Disease</span><span class="dr-pct" style="color:#d97706">38%</span></div><div class="dr-bar-bg"><div class="dr-bar" style="width:38%;background:#d97706"></div></div></div>
+        <div><div class="dr-top"><span class="dr-name">Kidney Disease</span><span class="dr-pct" style="color:#16a34a">24%</span></div><div class="dr-bar-bg"><div class="dr-bar" style="width:24%;background:#16a34a"></div></div></div>
+        <div><div class="dr-top"><span class="dr-name">Lung Disease</span><span class="dr-pct" style="color:#7c3aed">55%</span></div><div class="dr-bar-bg"><div class="dr-bar" style="width:55%;background:#7c3aed"></div></div></div>
+      </div>
+      <div class="risk-badge">⚠️ Highest Risk: Heart Disease (81%)</div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- PREDICTION SECTION -->
+<section id="predict" class="predict-section">
+  <div class="section-label" style="color:var(--red)">AI Prediction</div>
+  <h2 class="section-head">Select a disease to predict</h2>
+  <p class="section-sub">Choose any condition below and fill in only the fields relevant to that disease. Each model uses its own specific parameters.</p>
+
+  <!-- TABS -->
+  <div class="disease-tabs">
+    <div class="disease-tab active" data-disease="diabetes">
+      <div class="tab-dot" style="background:#2563eb"></div> Diabetes
+    </div>
+    <div class="disease-tab" data-disease="heart">
+      <div class="tab-dot" style="background:#e8392a"></div> Heart Disease
+    </div>
+    <div class="disease-tab" data-disease="liver">
+      <div class="tab-dot" style="background:#d97706"></div> Liver Disease
+    </div>
+    <div class="disease-tab" data-disease="kidney">
+      <div class="tab-dot" style="background:#16a34a"></div> Kidney Disease
+    </div>
+    <div class="disease-tab" data-disease="lung">
+      <div class="tab-dot" style="background:#7c3aed"></div> Lung Disease
+    </div>
+  </div>
+
+  <div class="form-panels">
+
+    <!-- ═══════════════ DIABETES ═══════════════ -->
+    <div class="form-panel panel-diabetes active" id="panel-diabetes">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-icon" style="background:#eff6ff">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+          </div>
+          <div>
+            <div class="panel-title" style="color:var(--blue)">Diabetes Risk Prediction</div>
+            <div class="panel-desc">Uses glucose levels, BMI, insulin, HbA1c, and lifestyle factors — 14 features total</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form action="/predict_single" method="POST">
+            <input type="hidden" name="disease" value="diabetes">
+            <div class="inputs-grid">
+              <div class="input-group"><label>Age (years)</label><input type="number" name="age" placeholder="e.g. 45" required></div>
+              <div class="input-group"><label>Gender</label><select name="gender"><option value="0">Female</option><option value="1">Male</option></select></div>
+              <div class="input-group"><label>Glucose Level (mg/dL)</label><input type="number" name="glucose" placeholder="e.g. 120" step="0.1"></div>
+              <div class="input-group"><label>Blood Pressure (mmHg)</label><input type="number" name="bp" placeholder="e.g. 80" step="0.1"></div>
+              <div class="input-group"><label>Skin Thickness (mm)</label><input type="number" name="skin_thickness" placeholder="e.g. 20" step="0.1"></div>
+              <div class="input-group"><label>Insulin (mu U/ml)</label><input type="number" name="insulin" placeholder="e.g. 80" step="0.1"></div>
+              <div class="input-group"><label>BMI (kg/m²)</label><input type="number" name="bmi" placeholder="e.g. 26.5" step="0.1"></div>
+              <div class="input-group"><label>HbA1c Level (%)</label><input type="number" name="hba1c" placeholder="e.g. 5.7" step="0.01"></div>
+              <div class="input-group"><label>Diabetes Pedigree</label><input type="number" name="diabetes_pedigree" placeholder="e.g. 0.5" step="0.001"></div>
+              <div class="input-group"><label>Pregnancies</label><input type="number" name="pregnancies" placeholder="e.g. 2" min="0"></div>
+              <div class="input-group"><label>Family History</label><select name="family_history_diabetes"><option value="0">No</option><option value="1">Yes</option></select></div>
+              <div class="input-group"><label>Smoking</label><select name="smoking"><option value="0">No</option><option value="1">Yes</option></select></div>
+              <div class="input-group"><label>Physical Activity</label><select name="physical_activity"><option value="1">Active</option><option value="0">Inactive</option></select></div>
+              <div class="input-group"><label>Hypertension</label><select name="hypertension"><option value="0">No</option><option value="1">Yes</option></select></div>
+            </div>
+            <button type="submit" class="predict-btn btn-diabetes">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Predict Diabetes Risk
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ HEART ═══════════════ -->
+    <div class="form-panel panel-heart" id="panel-heart">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-icon" style="background:#fef2f2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8392a" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div>
+            <div class="panel-title" style="color:var(--red)">Heart Disease Risk Prediction</div>
+            <div class="panel-desc">Uses cholesterol, ECG, chest pain type, ST values, and cardiac indicators — 16 features total</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form action="/predict_single" method="POST">
+            <input type="hidden" name="disease" value="heart">
+            <div class="inputs-grid">
+              <div class="input-group"><label>Age (years)</label><input type="number" name="age" placeholder="e.g. 54" required></div>
+              <div class="input-group"><label>Sex</label><select name="sex"><option value="0">Female</option><option value="1">Male</option></select></div>
+              <div class="input-group"><label>Chest Pain Type (cp)</label><select name="cp"><option value="0">Typical Angina</option><option value="1">Atypical Angina</option><option value="2">Non-anginal</option><option value="3">Asymptomatic</option></select></div>
+              <div class="input-group"><label>Resting BP (trestbps)</label><input type="number" name="trestbps" placeholder="e.g. 120" step="0.1"></div>
+              <div class="input-group"><label>Cholesterol (mg/dL)</label><input type="number" name="chol" placeholder="e.g. 200" step="0.1"></div>
+              <div class="input-group"><label>Fasting Blood Sugar &gt;120</label><select name="fbs"><option value="0">No (≤120)</option><option value="1">Yes (&gt;120)</option></select></div>
+              <div class="input-group"><label>Resting ECG</label><select name="restecg"><option value="0">Normal</option><option value="1">ST-T Abnormality</option><option value="2">LV Hypertrophy</option></select></div>
+              <div class="input-group"><label>Max Heart Rate (thalach)</label><input type="number" name="thalach" placeholder="e.g. 150" step="0.1"></div>
+              <div class="input-group"><label>Exercise Angina</label><select name="exang"><option value="0">No</option><option value="1">Yes</option></select></div>
+              <div class="input-group"><label>ST Depression (oldpeak)</label><input type="number" name="oldpeak" placeholder="e.g. 1.0" step="0.1"></div>
+              <div class="input-group"><label>Slope of ST</label><select name="slope"><option value="0">Upsloping</option><option value="1">Flat</option><option value="2">Downsloping</option></select></div>
+              <div class="input-group"><label>Major Vessels (ca)</label><select name="ca"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+              <div class="input-group"><label>Thal</label><select name="thal"><option value="1">Normal</option><option value="2">Fixed Defect</option><option value="3">Reversible Defect</option></select></div>
+              <div class="input-group"><label>Smoking</label><select name="smoking"><option value="0">No</option><option value="1">Yes</option></select></div>
+              <div class="input-group"><label>Diabetes</label><select name="heart_diabetes"><option value="0">No</option><option value="1">Yes</option></select></div>
+              <div class="input-group"><label>BMI (kg/m²)</label><input type="number" name="bmi" placeholder="e.g. 27.0" step="0.1"></div>
+            </div>
+            <button type="submit" class="predict-btn btn-heart">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Predict Heart Disease Risk
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ LIVER ═══════════════ -->
+    <div class="form-panel panel-liver" id="panel-liver">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-icon" style="background:#fffbeb">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><ellipse cx="12" cy="12" rx="8" ry="10"/><path d="M8 8c1 2 6 2 8 0M8 12c1 2 6 2 8 0"/></svg>
+          </div>
+          <div>
+            <div class="panel-title" style="color:var(--amber)">Liver Disease Risk Prediction</div>
+            <div class="panel-desc">Uses bilirubin, enzyme levels, albumin and protein ratios — 11 features total</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form action="/predict_single" method="POST">
+            <input type="hidden" name="disease" value="liver">
+            <div class="inputs-grid">
+              <div class="input-group"><label>Age (years)</label><input type="number" name="age" placeholder="e.g. 45" required></div>
+              <div class="input-group"><label>Gender</label><select name="gender"><option value="0">Female</option><option value="1">Male</option></select></div>
+              <div class="input-group"><label>Total Bilirubin (mg/dL)</label><input type="number" name="total_bilirubin" placeholder="e.g. 0.8" step="0.01"></div>
+              <div class="input-group"><label>Direct Bilirubin (mg/dL)</label><input type="number" name="direct_bilirubin" placeholder="e.g. 0.2" step="0.01"></div>
+              <div class="input-group"><label>Alkaline Phosphotase</label><input type="number" name="alkaline_phosphotase" placeholder="e.g. 200"></div>
+              <div class="input-group"><label>Alamine Aminotransferase</label><input type="number" name="alamine_aminotransferase" placeholder="e.g. 25"></div>
+              <div class="input-group"><label>Aspartate Aminotransferase</label><input type="number" name="aspartate_aminotransferase" placeholder="e.g. 30"></div>
+              <div class="input-group"><label>Total Proteins (g/dL)</label><input type="number" name="total_proteins" placeholder="e.g. 6.5" step="0.1"></div>
+              <div class="input-group"><label>Albumin (g/dL)</label><input type="number" name="albumin" placeholder="e.g. 3.5" step="0.1"></div>
+              <div class="input-group"><label>A/G Ratio</label><input type="number" name="ag_ratio" placeholder="e.g. 1.1" step="0.01"></div>
+            </div>
+            <button type="submit" class="predict-btn btn-liver">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Predict Liver Disease Risk
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ KIDNEY ═══════════════ -->
+    <div class="form-panel panel-kidney" id="panel-kidney">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-icon" style="background:#f0fdf4">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+          </div>
+          <div>
+            <div class="panel-title" style="color:var(--green)">Kidney Disease Risk Prediction</div>
+            <div class="panel-desc">Uses blood pressure (systolic & diastolic), urea, creatinine and albumin — 6 features total</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form action="/predict_single" method="POST">
+            <input type="hidden" name="disease" value="kidney">
+            <div class="inputs-grid-3">
+              <div class="input-group"><label>Age (years)</label><input type="number" name="age" placeholder="e.g. 50" required></div>
+              <div class="input-group"><label>BP Systolic (mmHg)</label><input type="number" name="bp_systolic" placeholder="e.g. 120"></div>
+              <div class="input-group"><label>BP Diastolic (mmHg)</label><input type="number" name="bp_diastolic" placeholder="e.g. 80"></div>
+              <div class="input-group"><label>Blood Urea (mg/dL)</label><input type="number" name="urea" placeholder="e.g. 30" step="0.1"></div>
+              <div class="input-group"><label>Serum Creatinine (mg/dL)</label><input type="number" name="creatinine" placeholder="e.g. 1.0" step="0.01"></div>
+              <div class="input-group"><label>Albumin (g/dL)</label><input type="number" name="albumin" placeholder="e.g. 3.5" step="0.1"></div>
+            </div>
+            <button type="submit" class="predict-btn btn-kidney">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Predict Kidney Disease Risk
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ LUNG ═══════════════ -->
+    <div class="form-panel panel-lung" id="panel-lung">
+      <div class="panel-card">
+        <div class="panel-header">
+          <div class="panel-icon" style="background:#faf5ff">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M2 12C2 6.5 7 3 12 3s10 3.5 10 9-5 10-10 10S2 17.5 2 12z"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z"/></svg>
+          </div>
+          <div>
+            <div class="panel-title" style="color:var(--purple)">Lung Disease Risk Prediction</div>
+            <div class="panel-desc">Uses lung capacity, smoking history, hospital visits, disease and treatment type — 11 features total</div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <form action="/predict_single" method="POST">
+            <input type="hidden" name="disease" value="lung">
+            <div class="inputs-grid">
+              <div class="input-group"><label>Age (years)</label><input type="number" name="age" placeholder="e.g. 45" required></div>
+              <div class="input-group"><label>Sex</label><select name="sex"><option value="0">Female</option><option value="1">Male</option></select></div>
+              <div class="input-group"><label>Lung Capacity (L)</label><input type="number" name="lung_capacity" placeholder="e.g. 3.5" step="0.01"></div>
+              <div class="input-group"><label>Hospital Visits / year</label><input type="number" name="hospital_visits" placeholder="e.g. 2" min="0"></div>
+              <div class="input-group"><label>Smoking</label><select name="smoking"><option value="0">No</option><option value="1">Yes</option></select></div>
+              <div class="input-group"><label>Disease Type</label>
+                <select name="disease_type">
+                  <option value="none">None / Unknown</option>
+                  <option value="bronchitis">Bronchitis</option>
+                  <option value="copd">COPD</option>
+                  <option value="lung_cancer">Lung Cancer</option>
+                  <option value="pneumonia">Pneumonia</option>
+                </select>
+              </div>
+              <div class="input-group"><label>Treatment Type</label>
+                <select name="treatment_type">
+                  <option value="none">None / Unknown</option>
+                  <option value="surgery">Surgery</option>
+                  <option value="therapy">Therapy</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="predict-btn btn-lung">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Predict Lung Disease Risk
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /form-panels -->
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="how-inner">
+    <div class="section-label" style="color:#f87171">Process</div>
+    <h2 class="section-head" style="color:#fff">How it works</h2>
+    <p class="section-sub" style="color:#9ca3af">Three simple steps from data entry to actionable risk insight.</p>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-num">01</div><div class="step-title">Pick a disease</div><div class="step-desc">Select one of the five conditions using the tabs. Each has its own dedicated form with only the relevant fields.</div></div>
+      <div class="step-card"><div class="step-num">02</div><div class="step-title">Enter health data</div><div class="step-desc">Fill in the clinical parameters — most are available from a standard blood test or health check-up.</div></div>
+      <div class="step-card"><div class="step-num">03</div><div class="step-title">Get your risk score</div><div class="step-desc">The trained ML model returns a risk percentage instantly, with a clear result page.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  © 2024 <strong>MediPredict AI</strong>. Not a substitute for professional medical advice.
+</footer>
+
+<script>
+  const tabs = document.querySelectorAll('.disease-tab');
+  const panels = document.querySelectorAll('.form-panel');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.disease).classList.add('active');
+    });
+  });
+
+  // Show current patient in nav
+  (function() {
+    const p = JSON.parse(localStorage.getItem('medipredict_current_patient') || 'null');
+    if (!p) return;
+    const chip = document.getElementById('navPatientChip');
+    const label = document.getElementById('navPatientLabel');
+    if (chip && label) {
+      chip.style.display = 'flex';
+      label.textContent = p.id + ' · ' + (p.name || p.firstName);
+    }
+  })();
+</script>
+</body>
+</html>

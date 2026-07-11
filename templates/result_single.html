@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ disease }} Result – MediPredict AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#f7f6f2; --ink:#0e0e0e; --ink2:#2c2c2c; --ink3:#6b6b6b;
+  --red:#e8392a; --red2:#c42e1d; --blue:#2563eb; --amber:#d97706;
+  --purple:#7c3aed; --green:#16a34a; --card:#ffffff; --border:rgba(0,0,0,.09);
+  --head:'Cabinet Grotesk',sans-serif; --body:'Instrument Sans',sans-serif;
+}
+{% set color_map = {
+  'Diabetes':      '#2563eb',
+  'Heart Disease': '#e8392a',
+  'Liver Disease': '#d97706',
+  'Kidney Disease':'#16a34a',
+  'Lung Disease':  '#7c3aed'
+} %}
+{% set c = color_map[disease] %}
+body { font-family: var(--body); background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; flex-direction: column; }
+nav { background: #fff; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 48px; height: 64px; }
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo { width: 34px; height: 34px; background: var(--red); border-radius: 9px; display: grid; place-items: center; }
+.nav-name { font-family: var(--head); font-size: 1rem; font-weight: 800; color: var(--ink); letter-spacing: -.02em; }
+.nav-links a { font-size: .875rem; color: var(--ink3); text-decoration: none; padding: 7px 16px; border-radius: 8px; transition: background .15s; font-weight: 500; }
+.nav-links a:hover { background: var(--bg); }
+
+.page { flex: 1; max-width: 720px; margin: 0 auto; width: 100%; padding: 60px 32px 80px; }
+.breadcrumb { font-size: .78rem; color: var(--ink3); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+.breadcrumb a { color: var(--ink3); text-decoration: none; }
+.breadcrumb a:hover { color: var(--ink); }
+
+/* Big result card */
+.result-card {
+  background: var(--card); border-radius: 24px;
+  border: 2px solid {{ c }}33;
+  box-shadow: 0 8px 48px {{ c }}1a;
+  padding: 48px 40px; text-align: center;
+  animation: fadeUp .4s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.disease-icon { width: 64px; height: 64px; border-radius: 18px; background: {{ c }}18; display: grid; place-items: center; margin: 0 auto 20px; }
+.disease-name { font-family: var(--head); font-size: 1rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: {{ c }}; margin-bottom: 8px; }
+.result-label { font-size: .9rem; color: var(--ink3); margin-bottom: 28px; }
+
+/* Big percentage */
+.big-pct {
+  font-family: var(--head); font-size: 6rem; font-weight: 900;
+  letter-spacing: -.06em; color: {{ c }}; line-height: 1;
+  margin-bottom: 8px;
+}
+.risk-level {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 20px; border-radius: 20px; font-family: var(--head);
+  font-size: .9rem; font-weight: 800; margin-bottom: 32px;
+}
+
+/* Arc meter */
+.meter-wrap { display: flex; justify-content: center; margin-bottom: 32px; }
+.meter { width: 220px; height: 110px; position: relative; }
+.meter svg { width: 100%; height: 100%; }
+
+/* Info strip */
+.info-strip {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+  margin-bottom: 32px;
+}
+.info-item { background: var(--card); padding: 16px; text-align: center; }
+.info-num { font-family: var(--head); font-size: 1.3rem; font-weight: 900; color: var(--ink); letter-spacing: -.03em; }
+.info-lbl { font-size: .72rem; color: var(--ink3); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; margin-top: 3px; }
+
+/* Actions */
+.actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+.btn-back { display: inline-flex; align-items: center; gap: 7px; background: {{ c }}; color: #fff; font-family: var(--head); font-size: .9rem; font-weight: 700; padding: 12px 24px; border-radius: 10px; text-decoration: none; transition: opacity .2s; box-shadow: 0 4px 16px {{ c }}44; }
+.btn-back:hover { opacity: .85; }
+.btn-outline { display: inline-flex; align-items: center; gap: 7px; border: 1.5px solid var(--border); color: var(--ink2); font-family: var(--head); font-size: .9rem; font-weight: 600; padding: 11px 20px; border-radius: 10px; text-decoration: none; transition: background .15s; }
+.btn-outline:hover { background: rgba(0,0,0,.04); }
+
+.disclaimer { background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 14px 18px; font-size: .78rem; color: #92400e; line-height: 1.6; }
+
+footer { background: var(--ink); color: rgba(255,255,255,.4); text-align: center; padding: 20px; font-size: .8rem; margin-top: auto; }
+</style>
+</head>
+<body>
+<nav>
+  <a class="nav-brand" href="/predict-form">
+    <div class="nav-logo"><svg viewBox="0 0 20 20" fill="none"><path d="M10 18s-7-4.7-7-9.5A4.5 4.5 0 0 1 10 5.1a4.5 4.5 0 0 1 7 3.4C17 13.3 10 18 10 18z" fill="#fff"/></svg></div>
+    <span class="nav-name">MediPredict AI</span>
+  </a>
+  <div class="nav-links"><a href="/dashboard">← Dashboard</a></div>
+</nav>
+
+<div class="page">
+  <!-- Patient context banner -->
+  <div id="patientBanner" style="display:none;background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px 18px;margin-bottom:16px;align-items:center;gap:12px;justify-content:space-between">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;border-radius:10px;background:{{ c }}1a;display:grid;place-items:center;font-family:var(--head);font-size:.8rem;font-weight:900;color:{{ c }}" id="bannerInitials">?</div>
+      <div>
+        <div style="font-family:var(--head);font-size:.82rem;font-weight:800;color:var(--ink)" id="bannerName">Patient</div>
+        <div style="font-size:.72rem;color:var(--ink3)" id="bannerMeta"></div>
+      </div>
+    </div>
+    <div style="font-family:var(--head);font-size:.78rem;font-weight:700;color:#16a34a">✓ Saved to dashboard</div>
+  </div>
+
+  <div class="breadcrumb">
+    <a href="/predict-form">Home</a> <span>/</span>
+    <a href="/predict-form#predict">Predict</a> <span>/</span>
+    <span>{{ disease }} Result</span>
+  </div>
+
+  <div class="result-card">
+    <!-- Icon -->
+    <div class="disease-icon">
+      {% if disease == 'Diabetes' %}
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{ c }}" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      {% elif disease == 'Heart Disease' %}
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{ c }}" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      {% elif disease == 'Liver Disease' %}
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{ c }}" stroke-width="2"><ellipse cx="12" cy="12" rx="8" ry="10"/><path d="M8 8c1 2 6 2 8 0M8 12c1 2 6 2 8 0"/></svg>
+      {% elif disease == 'Kidney Disease' %}
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{ c }}" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      {% else %}
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="{{ c }}" stroke-width="2"><path d="M2 12C2 6.5 7 3 12 3s10 3.5 10 9-5 10-10 10S2 17.5 2 12z"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z"/></svg>
+      {% endif %}
+    </div>
+
+    <div class="disease-name">{{ disease }}</div>
+    <div class="result-label">Your predicted risk score</div>
+
+    <!-- Big number -->
+    <div class="big-pct">{{ score }}%</div>
+
+    <!-- Risk level badge -->
+    {% if score >= 70 %}
+    <div class="risk-level" style="background:#fef2f2;color:#991b1b;">⚠️ High Risk</div>
+    {% elif score >= 40 %}
+    <div class="risk-level" style="background:#fffbeb;color:#92400e;">⚡ Moderate Risk</div>
+    {% else %}
+    <div class="risk-level" style="background:#f0fdf4;color:#166534;">✓ Low Risk</div>
+    {% endif %}
+
+    <!-- Progress bar -->
+    <div style="height:10px;background:#f1f5f9;border-radius:5px;overflow:hidden;margin:0 0 32px;">
+      <div style="height:100%;width:{{ score }}%;background:{{ c }};border-radius:5px;transition:width 1s ease;"></div>
+    </div>
+
+    <!-- Info strip -->
+    <div class="info-strip">
+      <div class="info-item">
+        <div class="info-num">{{ score }}%</div>
+        <div class="info-lbl">Risk Score</div>
+      </div>
+      <div class="info-item">
+        <div class="info-num">{{ 100 - score }}%</div>
+        <div class="info-lbl">Healthy Score</div>
+      </div>
+      <div class="info-item">
+        <div class="info-num">
+          {% if score >= 70 %}High{% elif score >= 40 %}Medium{% else %}Low{% endif %}
+        </div>
+        <div class="info-lbl">Risk Level</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <a href="/predict-form#predict" class="btn-back">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        Predict Again
+      </a>
+      <a href="/dashboard" class="btn-outline">View Dashboard</a>
+      <button type="button" class="btn-outline" id="sendReportBtn" onclick="sendReport()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+        <span id="sendReportLabel">Send Report</span>
+      </button>
+    </div>
+
+    <div id="sendReportStatus" style="display:none;font-size:.82rem;font-weight:600;margin-bottom:18px;padding:10px 16px;border-radius:10px;"></div>
+
+    <div class="disclaimer">
+      ⚠️ <strong>Disclaimer:</strong> This result is generated by a machine learning model and is for informational purposes only. It is not a medical diagnosis. Please consult a qualified healthcare professional.
+    </div>
+  </div>
+</div>
+
+<footer>© 2024 MediPredict AI. All rights reserved.</footer>
+
+<script>
+  // Animate bar on load
+  window.addEventListener('load', () => {
+    const bar = document.querySelector('[style*="width:{{ score }}%"]');
+    if (bar) { bar.style.width = '0'; setTimeout(() => bar.style.width = '{{ score }}%', 100); }
+  });
+
+  // ── Show patient banner if session exists ──
+  (function showBanner() {
+    const patient = JSON.parse(localStorage.getItem('medipredict_current_patient') || 'null');
+    if (!patient) return;
+    const banner = document.getElementById('patientBanner');
+    banner.style.display = 'flex';
+    const name = patient.name || (patient.firstName + ' ' + patient.lastName);
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('bannerInitials').textContent = initials;
+    document.getElementById('bannerName').textContent = patient.id + ' · ' + name;
+    document.getElementById('bannerMeta').textContent = 'Age ' + patient.age + ' · ' + patient.gender;
+  })();
+  (function savePrediction() {
+    const patient = JSON.parse(localStorage.getItem('medipredict_current_patient') || 'null');
+    const prediction = {
+      id: Date.now(),
+      patientId:     patient ? patient.id   : 'PT-WALK-IN',
+      patientName:   patient ? patient.name : 'Walk-in Patient',
+      patientAge:    patient ? patient.age  : '—',
+      patientGender: patient ? patient.gender : '—',
+      disease: '{{ disease }}',
+      score:   {{ score }},
+      date:    new Date().toISOString()
+    };
+
+    // Save prediction
+    const preds = JSON.parse(localStorage.getItem('medipredict_predictions') || '[]');
+    // Avoid duplicate on refresh (same patient+disease within last 30s)
+    const isDup = preds.some(p =>
+      p.patientId === prediction.patientId &&
+      p.disease === prediction.disease &&
+      Math.abs(new Date(p.date) - new Date(prediction.date)) < 30000
+    );
+    if (!isDup) {
+      preds.unshift(prediction);
+      localStorage.setItem('medipredict_predictions', JSON.stringify(preds));
+    }
+
+    // Update patient's prediction list
+    if (patient) {
+      const patients = JSON.parse(localStorage.getItem('medipredict_patients') || '[]');
+      const idx = patients.findIndex(p => p.id === patient.id);
+      if (idx >= 0) {
+        if (!patients[idx].predictions) patients[idx].predictions = [];
+        if (!isDup) patients[idx].predictions.push({ disease: prediction.disease, score: prediction.score, date: prediction.date });
+        localStorage.setItem('medipredict_patients', JSON.stringify(patients));
+      }
+    }
+  })();
+
+  // ── Send Report (emails PDF to the patient's stored email) ──
+  function sendReport() {
+    const patient = JSON.parse(localStorage.getItem('medipredict_current_patient') || 'null');
+    const statusEl = document.getElementById('sendReportStatus');
+    const btn = document.getElementById('sendReportBtn');
+    const label = document.getElementById('sendReportLabel');
+
+    function showStatus(ok, text) {
+      statusEl.style.display = 'block';
+      statusEl.style.background = ok ? '#f0fdf4' : '#fef2f2';
+      statusEl.style.color = ok ? '#166534' : '#991b1b';
+      statusEl.style.border = '1px solid ' + (ok ? '#bbf7d0' : '#fecaca');
+      statusEl.textContent = text;
+    }
+
+    if (!patient || !patient.email) {
+      showStatus(false, 'No patient email on file. Book a demo with an email address first.');
+      return;
+    }
+
+    btn.disabled = true;
+    label.textContent = 'Sending…';
+
+    fetch('/send_report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        patient: {
+          id: patient.id, name: patient.name, age: patient.age,
+          gender: patient.gender, email: patient.email
+        },
+        results: { '{{ disease }}': {{ score }} },
+        date: new Date().toISOString()
+      })
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.ok) {
+          showStatus(true, '✓ ' + data.message);
+        } else {
+          showStatus(false, data.error || 'Failed to send report.');
+        }
+      })
+      .catch(err => showStatus(false, 'Network error: could not reach the server.'))
+      .finally(() => { btn.disabled = false; label.textContent = 'Send Report'; });
+  }
+</script>
+</body>
+</html>

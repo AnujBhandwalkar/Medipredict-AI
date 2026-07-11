@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MediPredict AI – AI-Powered Disease Risk Prediction</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:#f7f6f2; --bg2:#efefea; --ink:#0e0e0e; --ink2:#2c2c2c; --ink3:#6b6b6b;
+  --red:#e8392a; --red2:#c42e1d; --blue:#2563eb; --amber:#d97706;
+  --purple:#7c3aed; --green:#16a34a; --card:#ffffff; --border:rgba(0,0,0,.09);
+  --head:'Cabinet Grotesk',sans-serif; --body:'Instrument Sans',sans-serif;
+}
+body { font-family: var(--body); background: var(--bg); color: var(--ink); overflow-x: hidden; }
+
+/* NAV */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(247,246,242,.95); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 66px;
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav-logo { width: 36px; height: 36px; background: var(--red); border-radius: 10px; display: grid; place-items: center; }
+.nav-name { font-family: var(--head); font-size: 1.05rem; font-weight: 800; color: var(--ink); letter-spacing: -.02em; }
+.nav-links { display: flex; gap: 4px; align-items: center; }
+.nav-links a { font-size: .875rem; font-weight: 500; color: var(--ink2); text-decoration: none; padding: 7px 16px; border-radius: 8px; transition: background .15s; }
+.nav-links a:hover { background: rgba(0,0,0,.05); }
+.nav-cta { background: var(--red) !important; color: #fff !important; padding: 9px 20px !important; border-radius: 10px !important; font-weight: 700 !important; font-family: var(--head) !important; }
+.nav-cta:hover { background: var(--red2) !important; }
+
+/* HERO */
+.hero {
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: center; gap: 0;
+  padding: 70px 48px 80px; max-width: 1280px; margin: 0 auto;
+}
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #fef2f2; border: 1px solid #fca5a5; color: var(--red);
+  font-size: .78rem; font-weight: 600; padding: 5px 12px; border-radius: 20px;
+  margin-bottom: 24px; text-transform: uppercase; letter-spacing: .07em;
+}
+.hero-pill span { width: 6px; height: 6px; background: var(--red); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(1.5)} }
+
+h1 { font-family: var(--head); font-size: clamp(2.4rem,4.2vw,3.8rem); font-weight: 900; line-height: 1.05; letter-spacing: -.04em; margin-bottom: 20px; }
+h1 em { font-style: normal; color: var(--red); }
+.hero-sub { font-size: 1rem; line-height: 1.7; color: var(--ink3); margin-bottom: 36px; max-width: 460px; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 52px; }
+
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--red); color: #fff; font-family: var(--head); font-size: .95rem; font-weight: 700; padding: 13px 26px; border-radius: 12px; text-decoration: none; transition: background .2s, transform .15s; box-shadow: 0 4px 20px rgba(232,57,42,.3); cursor: pointer; border: none; }
+.btn-primary:hover { background: var(--red2); transform: translateY(-1px); }
+.btn-outline { display: inline-flex; align-items: center; gap: 8px; border: 1.5px solid var(--border); color: var(--ink2); font-family: var(--head); font-size: .95rem; font-weight: 600; padding: 12px 22px; border-radius: 12px; text-decoration: none; transition: background .15s; cursor: pointer; background: none; }
+.btn-outline:hover { background: rgba(0,0,0,.04); }
+
+.hero-stats { display: flex; gap: 32px; }
+.stat-num { font-family: var(--head); font-size: 1.5rem; font-weight: 900; letter-spacing: -.04em; }
+.stat-label { font-size: .78rem; color: var(--ink3); margin-top: 2px; }
+
+/* Hero visual / floating card */
+.hero-visual { display: flex; justify-content: center; align-items: center; padding: 20px; }
+.hero-card {
+  background: var(--card); border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.12);
+  padding: 28px; width: 100%; max-width: 400px;
+  border: 1px solid var(--border);
+  animation: floatCard 4s ease-in-out infinite;
+}
+@keyframes floatCard {
+  0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)}
+}
+.hc-header { font-family: var(--head); font-weight: 800; font-size: .95rem; color: var(--ink); margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.hc-dot { width: 8px; height: 8px; background: var(--red); border-radius: 50%; animation: pulse 2s infinite; }
+.disease-rows { display: flex; flex-direction: column; gap: 12px; }
+.dr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.dr-name { font-size: .82rem; font-weight: 600; color: var(--ink2); }
+.dr-pct { font-family: var(--head); font-size: .85rem; font-weight: 800; }
+.dr-bar-bg { height: 5px; background: var(--bg2); border-radius: 3px; overflow: hidden; }
+.dr-bar { height: 100%; border-radius: 3px; animation: growBar 1.5s ease forwards; }
+@keyframes growBar { from{width:0} }
+.risk-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 18px; background: #fff7ed; border: 1px solid #fed7aa; padding: 8px 14px; border-radius: 10px; font-size: .78rem; font-weight: 600; color: #c2410c; }
+
+/* FEATURES SECTION */
+.features-section { background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 80px 48px; }
+.features-inner { max-width: 1280px; margin: 0 auto; }
+.section-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--red); margin-bottom: 10px; }
+.section-head { font-family: var(--head); font-size: clamp(1.8rem,3vw,2.4rem); font-weight: 900; letter-spacing: -.04em; margin-bottom: 10px; }
+.section-sub { font-size: .95rem; color: var(--ink3); max-width: 520px; line-height: 1.7; margin-bottom: 48px; }
+
+.features-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; }
+@media(max-width:900px){ .features-grid { grid-template-columns: 1fr 1fr; } }
+@media(max-width:560px){ .features-grid { grid-template-columns: 1fr; } }
+
+.feature-card {
+  background: var(--bg); border-radius: 16px; padding: 28px 24px;
+  border: 1px solid var(--border); transition: transform .2s, box-shadow .2s;
+}
+.feature-card:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(0,0,0,.08); }
+.feature-icon { width: 48px; height: 48px; border-radius: 13px; display: grid; place-items: center; margin-bottom: 16px; }
+.feature-title { font-family: var(--head); font-size: 1rem; font-weight: 800; letter-spacing: -.02em; margin-bottom: 8px; }
+.feature-desc { font-size: .875rem; color: var(--ink3); line-height: 1.6; }
+
+/* DISEASES SECTION */
+.diseases-section { padding: 80px 48px; max-width: 1280px; margin: 0 auto; }
+.disease-cards-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 16px; }
+@media(max-width:900px){ .disease-cards-grid { grid-template-columns: repeat(3,1fr); } }
+@media(max-width:560px){ .disease-cards-grid { grid-template-columns: 1fr 1fr; } }
+.dc-card {
+  border-radius: 16px; padding: 24px 18px; text-align: center;
+  border: 1.5px solid var(--border); background: var(--card);
+  transition: transform .2s, box-shadow .2s; cursor: default;
+}
+.dc-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
+.dc-icon { width: 48px; height: 48px; border-radius: 13px; display: grid; place-items: center; margin: 0 auto 14px; }
+.dc-name { font-family: var(--head); font-size: .85rem; font-weight: 800; letter-spacing: -.01em; margin-bottom: 6px; }
+.dc-feat { font-size: .72rem; color: var(--ink3); line-height: 1.5; }
+
+/* HOW IT WORKS */
+.how-section {
+  background: var(--ink); padding: 80px 48px;
+}
+.how-inner { max-width: 1280px; margin: 0 auto; }
+.steps-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+@media(max-width:960px){ .steps-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:500px){ .steps-grid { grid-template-columns: 1fr; } }
+.step-card { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); border-radius: 16px; padding: 28px 24px; }
+.step-num { font-family: var(--head); font-size: 2.5rem; font-weight: 900; color: rgba(255,255,255,.08); letter-spacing: -.06em; margin-bottom: 12px; }
+.step-title { font-family: var(--head); font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.step-desc { font-size: .85rem; color: rgba(255,255,255,.45); line-height: 1.6; }
+
+/* CTA SECTION */
+.cta-section { padding: 80px 48px; text-align: center; }
+.cta-inner { max-width: 640px; margin: 0 auto; }
+.cta-inner h2 { font-family: var(--head); font-size: clamp(2rem,4vw,3rem); font-weight: 900; letter-spacing: -.05em; margin-bottom: 16px; }
+.cta-inner p { font-size: 1rem; color: var(--ink3); line-height: 1.7; margin-bottom: 32px; }
+.cta-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* FOOTER */
+footer {
+  background: var(--ink); color: rgba(255,255,255,.35);
+  text-align: center; padding: 24px; font-size: .8rem;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* ══════════════════════════════════════════
+   BOOK DEMO MODAL
+══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(14,14,14,.55);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--card); border-radius: 24px;
+  width: 100%; max-width: 520px;
+  box-shadow: 0 32px 80px rgba(0,0,0,.2);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transform: translateY(20px) scale(.97);
+  transition: transform .25s;
+}
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+.modal-header {
+  background: var(--ink); padding: 28px 32px 24px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.modal-title { font-family: var(--head); font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.03em; }
+.modal-sub { font-size: .82rem; color: rgba(255,255,255,.45); margin-top: 4px; }
+.modal-close {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,255,255,.08); border: none; cursor: pointer;
+  display: grid; place-items: center; color: rgba(255,255,255,.5);
+  flex-shrink: 0; margin-left: 12px; transition: background .15s;
+}
+.modal-close:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+.modal-body { padding: 28px 32px 32px; }
+.modal-step { display: none; }
+.modal-step.active { display: block; animation: fadeUp .3s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-row-1 { margin-bottom: 14px; }
+.input-group { display: flex; flex-direction: column; gap: 5px; }
+.input-group label { font-size: .72rem; font-weight: 700; color: var(--ink3); text-transform: uppercase; letter-spacing: .05em; }
+.input-group input, .input-group select {
+  height: 44px; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 0 14px; font-family: var(--body); font-size: .9rem; color: var(--ink);
+  background: var(--bg); outline: none; transition: border-color .2s, box-shadow .2s;
+  appearance: none; -webkit-appearance: none;
+}
+.input-group input:focus, .input-group select:focus {
+  border-color: var(--red); box-shadow: 0 0 0 3px rgba(232,57,42,.1);
+}
+.input-group input::placeholder { color: #c0bfba; }
+
+.modal-actions { display: flex; gap: 10px; margin-top: 22px; }
+.modal-actions .btn-primary { flex: 1; justify-content: center; font-size: .9rem; padding: 12px; }
+.modal-actions .btn-outline { font-size: .9rem; padding: 11px 20px; }
+
+/* Success step */
+.success-step { text-align: center; padding: 12px 0; }
+.success-icon {
+  width: 72px; height: 72px; background: #f0fdf4; border-radius: 50%;
+  display: grid; place-items: center; margin: 0 auto 20px;
+  border: 2px solid #bbf7d0;
+}
+.patient-id-box {
+  background: var(--bg); border: 2px dashed var(--border);
+  border-radius: 14px; padding: 18px 24px; margin: 20px 0;
+  text-align: center;
+}
+.patient-id-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--ink3); margin-bottom: 6px; }
+.patient-id-val { font-family: var(--head); font-size: 2rem; font-weight: 900; color: var(--ink); letter-spacing: .05em; }
+.success-desc { font-size: .875rem; color: var(--ink3); line-height: 1.6; margin-bottom: 8px; }
+.patient-meta { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 12px 0; }
+.meta-chip {
+  background: var(--bg2); border-radius: 8px; padding: 5px 12px;
+  font-size: .78rem; font-weight: 600; color: var(--ink2);
+}
+
+/* Testimonials strip */
+.testimonials { background: #fff; border-top: 1px solid var(--border); padding: 60px 48px; }
+.t-inner { max-width: 1280px; margin: 0 auto; }
+.t-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+@media(max-width:768px){ .t-grid { grid-template-columns: 1fr; } }
+.t-card {
+  background: var(--bg); border-radius: 14px; padding: 24px;
+  border: 1px solid var(--border);
+}
+.t-quote { font-size: .9rem; color: var(--ink2); line-height: 1.7; margin-bottom: 16px; font-style: italic; }
+.t-author { display: flex; align-items: center; gap: 10px; }
+.t-av {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--head); font-size: .85rem; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.t-name { font-size: .82rem; font-weight: 700; color: var(--ink); }
+.t-role { font-size: .72rem; color: var(--ink3); }
+
+@media(max-width:768px){
+  nav { padding: 0 20px; }
+  .hero { grid-template-columns: 1fr; padding: 40px 20px; }
+  .hero-visual { display: none; }
+  .features-section,.diseases-section,.cta-section,.how-section,.testimonials { padding: 60px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-brand" href="/landing">
+    <div class="nav-logo">
+      <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><path d="M10 18s-7-4.7-7-9.5A4.5 4.5 0 0 1 10 5.1a4.5 4.5 0 0 1 7 3.4C17 13.3 10 18 10 18z" fill="#fff"/></svg>
+    </div>
+    <span class="nav-name">MediPredict AI</span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#diseases">Diseases</a>
+    <a href="#how">How it works</a>
+    <a href="/dashboard">Dashboard</a>
+    <a href="#" class="nav-cta" onclick="openDemo(); return false;">Book Demo</a>
+  </div>
+</nav>
+
+<!-- ACCESS NOTICE (shown only if redirected from a gated page) -->
+<div id="accessNotice" style="display:none;background:#fff7ed;border-bottom:1px solid #fed7aa;padding:12px 48px;text-align:center;font-size:.85rem;font-weight:600;color:#9a3412;">
+  ⚠️ Please book a demo first to register a patient before running a prediction.
+</div>
+
+<!-- HERO -->
+<section>
+  <div class="hero">
+    <div class="hero-left">
+      <div class="hero-pill"><span></span> AI-Powered · 5 Diseases · Instant Results</div>
+      <h1>Early disease risk<br>detection, powered<br>by <em>machine learning</em></h1>
+      <p class="hero-sub">
+        MediPredict AI analyses your clinical data across five major diseases — delivering
+        accurate risk scores in seconds. Designed for clinicians, researchers, and health-conscious individuals.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="openDemo()">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Book a Demo Prediction
+        </button>
+        <a href="/dashboard" class="btn-outline">View Dashboard</a>
+      </div>
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">5</div>
+          <div class="stat-label">Diseases Covered</div>
+        </div>
+        <div>
+          <div class="stat-num">~83%</div>
+          <div class="stat-label">Model Accuracy</div>
+        </div>
+        <div>
+          <div class="stat-num">&lt;1s</div>
+          <div class="stat-label">Prediction Time</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hc-header">
+          <div class="hc-dot"></div>
+          Live Risk Analysis · PT-2847
+        </div>
+        <div class="disease-rows">
+          <div>
+            <div class="dr-top">
+              <span class="dr-name">Heart Disease</span>
+              <span class="dr-pct" style="color:#e8392a">74%</span>
+            </div>
+            <div class="dr-bar-bg"><div class="dr-bar" style="width:74%;background:#e8392a"></div></div>
+          </div>
+          <div>
+            <div class="dr-top">
+              <span class="dr-name">Diabetes</span>
+              <span class="dr-pct" style="color:#2563eb">58%</span>
+            </div>
+            <div class="dr-bar-bg"><div class="dr-bar" style="width:58%;background:#2563eb;animation-delay:.2s"></div></div>
+          </div>
+          <div>
+            <div class="dr-top">
+              <span class="dr-name">Lung Disease</span>
+              <span class="dr-pct" style="color:#7c3aed">42%</span>
+            </div>
+            <div class="dr-bar-bg"><div class="dr-bar" style="width:42%;background:#7c3aed;animation-delay:.4s"></div></div>
+          </div>
+          <div>
+            <div class="dr-top">
+              <span class="dr-name">Liver Disease</span>
+              <span class="dr-pct" style="color:#d97706">31%</span>
+            </div>
+            <div class="dr-bar-bg"><div class="dr-bar" style="width:31%;background:#d97706;animation-delay:.6s"></div></div>
+          </div>
+          <div>
+            <div class="dr-top">
+              <span class="dr-name">Kidney Disease</span>
+              <span class="dr-pct" style="color:#16a34a">18%</span>
+            </div>
+            <div class="dr-bar-bg"><div class="dr-bar" style="width:18%;background:#16a34a;animation-delay:.8s"></div></div>
+          </div>
+        </div>
+        <div class="risk-badge">⚠️ Heart Disease — Highest Risk · Action Recommended</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="features-inner">
+    <div class="section-label">Why MediPredict</div>
+    <h2 class="section-head">Built for real clinical use</h2>
+    <p class="section-sub">Every feature is designed with accuracy, speed, and clinical relevance in mind.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fef2f2">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8392a" stroke-width="2"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </div>
+        <div class="feature-title">Instant ML Predictions</div>
+        <div class="feature-desc">Trained on real clinical datasets, our models return risk scores under one second with high accuracy.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#eff6ff">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <div class="feature-title">5 Disease Coverage</div>
+        <div class="feature-desc">Diabetes, Heart, Liver, Kidney and Lung — each with dedicated, clinically-validated feature sets.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#f0fdf4">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="feature-title">Patient Dashboard</div>
+        <div class="feature-desc">Every prediction is logged with patient ID, risk scores and timestamps — accessible on the dashboard.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#faf5ff">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+        <div class="feature-title">Patient Management</div>
+        <div class="feature-desc">Book demos with patient details — name, age, gender and DOB — and receive a unique patient ID instantly.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#fffbeb">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="feature-title">Safe & Responsible</div>
+        <div class="feature-desc">All predictions include clear disclaimers. This tool supports — never replaces — professional medical advice.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon" style="background:#f7f6f2;border:1px solid var(--border)">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0e0e0e" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <div class="feature-title">Real-Time Results</div>
+        <div class="feature-desc">No waiting, no refresh. Results appear instantly with animated progress bars and clear risk-level labelling.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DISEASES COVERED -->
+<section class="diseases-section" id="diseases">
+  <div class="section-label" style="color:var(--red)">Coverage</div>
+  <h2 class="section-head">Five diseases. One platform.</h2>
+  <p class="section-sub">Each prediction model is independently trained and validated on clinical datasets specific to that disease.</p>
+  <div class="disease-cards-grid">
+    <div class="dc-card">
+      <div class="dc-icon" style="background:#eff6ff">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+      </div>
+      <div class="dc-name" style="color:#2563eb">Diabetes</div>
+      <div class="dc-feat">Glucose, HbA1c, BMI, insulin & more · 14 features</div>
+    </div>
+    <div class="dc-card">
+      <div class="dc-icon" style="background:#fef2f2">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e8392a" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+      </div>
+      <div class="dc-name" style="color:#e8392a">Heart Disease</div>
+      <div class="dc-feat">ECG, cholesterol, chest pain type · 16 features</div>
+    </div>
+    <div class="dc-card">
+      <div class="dc-icon" style="background:#fffbeb">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><ellipse cx="12" cy="12" rx="8" ry="10"/><path d="M8 8c1 2 6 2 8 0M8 12c1 2 6 2 8 0"/></svg>
+      </div>
+      <div class="dc-name" style="color:#d97706">Liver Disease</div>
+      <div class="dc-feat">Bilirubin, enzymes, albumin · 11 features</div>
+    </div>
+    <div class="dc-card">
+      <div class="dc-icon" style="background:#f0fdf4">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"/></svg>
+      </div>
+      <div class="dc-name" style="color:#16a34a">Kidney Disease</div>
+      <div class="dc-feat">Creatinine, urea, blood pressure · 6 features</div>
+    </div>
+    <div class="dc-card">
+      <div class="dc-icon" style="background:#faf5ff">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M2 12C2 6.5 7 3 12 3s10 3.5 10 9-5 10-10 10S2 17.5 2 12z"/><path d="M8 12c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z"/></svg>
+      </div>
+      <div class="dc-name" style="color:#7c3aed">Lung Disease</div>
+      <div class="dc-feat">Lung capacity, smoking, hospital visits · 11 features</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section" id="how">
+  <div class="how-inner">
+    <div class="section-label" style="color:#f87171">Process</div>
+    <h2 class="section-head" style="color:#fff; font-family: var(--head); font-size:clamp(1.8rem,3vw,2.4rem); font-weight:900; letter-spacing:-.04em; margin-bottom:10px;">How it works</h2>
+    <p class="section-sub" style="color:#9ca3af;margin-bottom:40px;">Four simple steps from patient registration to actionable risk insight.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-title">Book a demo</div>
+        <div class="step-desc">Enter patient name, age, date of birth and gender. Receive a unique Patient ID instantly.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-title">Pick a disease</div>
+        <div class="step-desc">Select one of five conditions. Each has a dedicated, disease-specific form with relevant clinical inputs.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-title">Enter health data</div>
+        <div class="step-desc">Fill in the clinical parameters — typically available from a standard blood test or routine health check-up.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">04</div>
+        <div class="step-title">Get risk score & track</div>
+        <div class="step-desc">The ML model returns a risk percentage instantly. Results are automatically stored in your dashboard.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="t-inner">
+    <div class="section-label">Testimonials</div>
+    <h2 class="section-head" style="margin-bottom:32px;">Trusted by health professionals</h2>
+    <div class="t-grid">
+      <div class="t-card">
+        <div class="t-quote">"MediPredict has transformed how we conduct preliminary screenings. The accuracy is remarkable and the interface is intuitive for our entire team."</div>
+        <div class="t-author">
+          <div class="t-av" style="background:#e8392a">DR</div>
+          <div>
+            <div class="t-name">Dr. Riya Sharma</div>
+            <div class="t-role">Internal Medicine, Apollo Hospitals</div>
+          </div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="t-quote">"The dashboard makes it incredibly easy to track patient risk over time. We've caught several high-risk cases early that we might have missed otherwise."</div>
+        <div class="t-author">
+          <div class="t-av" style="background:#2563eb">AK</div>
+          <div>
+            <div class="t-name">Arjun Kulkarni</div>
+            <div class="t-role">Clinical Researcher, AIIMS Delhi</div>
+          </div>
+        </div>
+      </div>
+      <div class="t-card">
+        <div class="t-quote">"Using this during health camps has been a game changer. Patients appreciate getting instant, understandable risk information on the spot."</div>
+        <div class="t-author">
+          <div class="t-av" style="background:#16a34a">PM</div>
+          <div>
+            <div class="t-name">Dr. Priya Mehta</div>
+            <div class="t-role">General Physician, Community Health</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2>Ready to predict<br>disease risk today?</h2>
+    <p>Book a demo prediction in under a minute. No signup required — just patient details and you're ready to go.</p>
+    <div class="cta-actions">
+      <button class="btn-primary" onclick="openDemo()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Book Demo Prediction
+      </button>
+      <a href="/dashboard" class="btn-outline">Go to Dashboard</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  © 2024 <strong style="color:rgba(255,255,255,.6)">MediPredict AI</strong>. Not a substitute for professional medical advice.
+</footer>
+
+<!-- ═══════════════ BOOK DEMO MODAL ═══════════════ -->
+<div class="modal-overlay" id="demoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Book a Demo Prediction</div>
+        <div class="modal-sub">Enter patient details to get started</div>
+      </div>
+      <button class="modal-close" onclick="closeDemo()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Step 1: Patient info -->
+      <div class="modal-step active" id="step1">
+        <div class="form-row">
+          <div class="input-group">
+            <label>First Name</label>
+            <input type="text" id="firstName" placeholder="e.g. Rahul" required>
+          </div>
+          <div class="input-group">
+            <label>Last Name</label>
+            <input type="text" id="lastName" placeholder="e.g. Sharma" required>
+          </div>
+        </div>
+        <div class="form-row-1">
+          <div class="input-group">
+            <label>Email Address</label>
+            <input
+              type="email"
+              id="patientEmail"
+              placeholder="e.g. rahul@gmail.com"
+              required
+            >
+          </div>
+        </div>
+
+        <div class="form-row-1">
+          <div class="input-group">
+            <label>Date of Birth</label>
+            <input type="date" id="patientDOB" required max="">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="input-group">
+            <label>Age (years)</label>
+            <input type="number" id="patientAge" placeholder="Auto-filled from DOB" min="1" max="120" readonly required>
+          </div>
+          <div class="input-group">
+            <label>Gender</label>
+            <select id="patientGender">
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div id="step1Error" style="font-size:.8rem;color:var(--red);margin-bottom:8px;display:none;">Please fill in all fields.</div>
+        <div class="modal-actions">
+          <button class="btn-primary" onclick="confirmBooking()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirm Booking
+          </button>
+          <button class="btn-outline" onclick="closeDemo()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Success + Patient ID -->
+      <div class="modal-step" id="step2">
+        <div class="success-step">
+          <div class="success-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div style="font-family:var(--head);font-size:1.3rem;font-weight:900;letter-spacing:-.03em;margin-bottom:8px;">Booking Confirmed!</div>
+          <div class="success-desc" id="successDesc">Your patient has been registered. Use the Patient ID below to track this session.</div>
+          <div class="patient-id-box">
+            <div class="patient-id-label">Patient ID</div>
+            <div class="patient-id-val" id="generatedPatientId">PT-0000</div>
+          </div>
+          <div class="patient-meta" id="patientMeta"></div>
+          <div class="success-desc" style="font-size:.8rem">The Patient ID has been saved. Head to the prediction form to run the analysis.</div>
+          <div class="modal-actions" style="margin-top:20px">
+            <a href="/predict-form" class="btn-primary" id="goToPredictBtn" style="flex:1;justify-content:center;text-decoration:none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Run Prediction
+            </a>
+            <button class="btn-outline" onclick="closeDemo()">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function openDemo() {
+  document.getElementById('demoModal').classList.add('open');
+  document.getElementById('step1').classList.add('active');
+  document.getElementById('step2').classList.remove('active');
+  document.body.style.overflow = 'hidden';
+}
+
+// Calculate age from a YYYY-MM-DD date-of-birth string
+function calculateAge(dobStr) {
+  if (!dobStr) return '';
+  const dob = new Date(dobStr);
+  if (isNaN(dob.getTime())) return '';
+  const today = new Date();
+  let age = today.getFullYear() - dob.getFullYear();
+  const hasNotHadBirthdayThisYear =
+    (today.getMonth() < dob.getMonth()) ||
+    (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate());
+  if (hasNotHadBirthdayThisYear) age--;
+  return age >= 0 ? age : '';
+}
+
+// Auto-fill Age the moment a Date of Birth is picked
+document.getElementById('patientDOB').addEventListener('change', function() {
+  const age = calculateAge(this.value);
+  document.getElementById('patientAge').value = age;
+});
+
+// Prevent picking a future date of birth
+(function setDobMax() {
+  const dobInput = document.getElementById('patientDOB');
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  dobInput.max = `${yyyy}-${mm}-${dd}`;
+})();
+
+function closeDemo() {
+  document.getElementById('demoModal').classList.remove('open');
+  document.body.style.overflow = '';
+  // Reset form
+  setTimeout(() => {
+    document.getElementById('firstName').value = '';
+    document.getElementById('lastName').value = '';
+    document.getElementById('patientEmail').value = '';
+    document.getElementById('patientAge').value = '';
+    document.getElementById('patientGender').value = '';
+    document.getElementById('patientDOB').value = '';
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step1Error').style.display = 'none';
+  }, 300);
+}
+
+function generatePatientId() {
+  const existing = JSON.parse(localStorage.getItem('medipredict_patients') || '[]');
+  const num = 2841 + existing.length + 1;
+  return 'PT-' + num;
+}
+
+function confirmBooking() {
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName = document.getElementById('lastName').value.trim();
+  const email = document.getElementById('patientEmail').value.trim();
+  const age = document.getElementById('patientAge').value.trim();
+  const gender = document.getElementById('patientGender').value;
+  const dob = document.getElementById('patientDOB').value;
+
+  // Check empty fields
+if (!firstName || !lastName || !email || !age || !gender || !dob) {
+    document.getElementById('step1Error').innerText =
+        "Please fill in all fields.";
+    document.getElementById('step1Error').style.display = 'block';
+    return;
+}
+
+// Email validation
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailPattern.test(email)) {
+    document.getElementById('step1Error').innerText =
+        "Please enter a valid email address.";
+    document.getElementById('step1Error').style.display = 'block';
+    return;
+}
+
+document.getElementById('step1Error').style.display = 'none';
+
+  const patients = JSON.parse(localStorage.getItem('medipredict_patients') || '[]');
+
+  // Check for existing patient with same name + DOB (case-insensitive)
+  const fullName = (firstName + ' ' + lastName).toLowerCase();
+  const existingPatient = patients.find(p =>
+    p.name && p.name.toLowerCase() === fullName && p.dob === dob
+  );
+
+  let patient;
+  let isReturning = false;
+
+  if (existingPatient) {
+    // Reuse existing patient — just update session, don't create duplicate
+    patient = existingPatient;
+    isReturning = true;
+  } else {
+    // New patient — create with fresh ID
+    const patientId = generatePatientId();
+    patient = {
+    id: patientId,
+      firstName,
+      lastName,
+      email,
+      name: firstName + ' ' + lastName,
+      age: parseInt(age),
+      gender,
+      dob,
+      bookedAt: new Date().toISOString(),
+      predictions: []
+    };
+    patients.unshift(patient);
+    localStorage.setItem('medipredict_patients', JSON.stringify(patients));
+  }
+
+  // Set current session
+  localStorage.setItem('medipredict_current_patient', JSON.stringify(patient));
+
+  // Show success
+  document.getElementById('generatedPatientId').textContent = patient.id;
+  document.getElementById('patientMeta').innerHTML = `
+    <span class="meta-chip">👤 ${patient.firstName || firstName} ${patient.lastName || lastName}</span>
+    <span class="meta-chip">📧 ${patient.email || email}</span>
+    <span class="meta-chip">🎂 Age ${patient.age || age}</span>
+    <span class="meta-chip">⚥ ${patient.gender || gender}</span>
+    ${isReturning ? '<span class="meta-chip" style="background:#f0fdf4;color:#15803d;border-color:#bbf7d0">↩ Returning patient</span>' : ''}
+  `;
+
+  // Update success message
+  const successDesc = document.getElementById('successDesc');
+  if (successDesc) {
+    successDesc.textContent = isReturning
+      ? 'Welcome back! Your existing Patient ID has been restored — all previous predictions are on file.'
+      : 'Your patient has been registered. Use the Patient ID below to track this session.';
+  }
+
+  document.getElementById('step1').classList.remove('active');
+  document.getElementById('step2').classList.add('active');
+}
+
+// Close on overlay click
+document.getElementById('demoModal').addEventListener('click', function(e) {
+  if (e.target === this) closeDemo();
+});
+
+// Check if redirected after prediction, or blocked from accessing predict-form directly
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('booked') === '1') {
+  openDemo();
+}
+if (urlParams.get('booking_required') === '1') {
+  const notice = document.getElementById('accessNotice');
+  if (notice) notice.style.display = 'block';
+  openDemo();
+}
+</script>
+</body>
+</html>
