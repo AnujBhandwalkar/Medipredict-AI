@@ -19,19 +19,24 @@
 ## 📸 Screenshots
 
 ### 1. Landing Page
-![Landing Page](screenshots/landing.png)
+<img width="1470" height="872" alt="Screenshot 2026-07-11 at 1 44 04 PM" src="https://github.com/user-attachments/assets/1992b44b-dfdc-4b8e-b506-8ceeb9b49ee4" />
+
 
 ### 2. Prediction Page
-![Prediction Page](screenshots/prediction.png)
+<img width="1470" height="871" alt="Screenshot 2026-07-11 at 1 45 27 PM" src="https://github.com/user-attachments/assets/dcc43a44-18f8-40dd-9aa5-f5050026c844" />
+
 
 ### 3. Result Page
-![Result Page](screenshots/result.png)
+<img width="1470" height="872" alt="Screenshot 2026-07-11 at 1 46 09 PM" src="https://github.com/user-attachments/assets/4ce72c88-da08-418a-a8ae-ba52978e4b37" />
+
 
 ### 4. Email Report
-![Email Report](screenshots/email-report.png)
+<img width="1091" height="764" alt="Screenshot 2026-07-11 at 1 54 50 PM" src="https://github.com/user-attachments/assets/9017a841-f49c-46c1-bd45-a658dd5e6811" />
+
 
 ### 5. Dashboard
-![Dashboard](screenshots/dashboard.png)
+<img width="1470" height="871" alt="Screenshot 2026-07-11 at 1 44 27 PM" src="https://github.com/user-attachments/assets/444bbcc4-f879-4796-a03d-7ea862c66e74" />
+
 
 ---
 
