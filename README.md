@@ -16,6 +16,25 @@
 
 ---
 
+## 📸 Screenshots
+
+### 1. Landing Page
+![Landing Page](screenshots/landing.png)
+
+### 2. Prediction Page
+![Prediction Page](screenshots/prediction.png)
+
+### 3. Result Page
+![Result Page](screenshots/result.png)
+
+### 4. Email Report
+![Email Report](screenshots/email-report.png)
+
+### 5. Dashboard
+![Dashboard](screenshots/dashboard.png)
+
+---
+
 ## 🧠 Machine Learning Models
 
 All models are **pre-trained** and included as `.pkl` files in the `models/` folder — no retraining required to run the app.
